@@ -1,5 +1,5 @@
 {
-	"name": "AzureBlob123",
+	"name": "AzureBlob1234",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureStorageLinkedService",
