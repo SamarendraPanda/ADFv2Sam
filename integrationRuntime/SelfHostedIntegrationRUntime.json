@@ -1,0 +1,6 @@
+{
+	"name": "SelfHostedIntegrationRUntime",
+	"properties": {
+		"type": "SelfHosted"
+	}
+}
