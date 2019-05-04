@@ -1,0 +1,22 @@
+{
+	"name": "SinkDataSet",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSQLSink",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"SinkTableName": {
+				"type": "string"
+			}
+		},
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"tableName": {
+				"value": "@dataset().SinkTableName",
+				"type": "Expression"
+			}
+		}
+	}
+}
