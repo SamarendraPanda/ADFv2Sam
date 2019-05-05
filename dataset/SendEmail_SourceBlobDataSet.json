@@ -1,0 +1,22 @@
+{
+	"name": "SendEmail_SourceBlobDataSet",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "MailActivity_SOurceBlob",
+			"type": "LinkedServiceReference"
+		},
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "input.txt",
+				"folderPath": "adftutorial/Input",
+				"container": "firstblobcontainer"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}
