@@ -5,6 +5,9 @@
 			"referenceName": "AzureStorageLinkedService12",
 			"type": "LinkedServiceReference"
 		},
+		"folder": {
+			"name": "Change Tracking"
+		},
 		"type": "DelimitedText",
 		"typeProperties": {
 			"location": {
