@@ -17,6 +17,9 @@
 		"AzureStorageLinkedService_connectionString": {
 			"value": ""
 		},
+		"AzureStorageLinkedService12_connectionString": {
+			"value": ""
+		},
 		"OnPremSQLServer_connectionString": {
 			"value": ""
 		},

@@ -24,6 +24,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'AzureStorageLinkedService'"
 		},
+		"AzureStorageLinkedService12_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'AzureStorageLinkedService12'"
+		},
 		"OnPremSQLServer_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'OnPremSQLServer'"
@@ -74,6 +78,9 @@
 					},
 					"AzureSQLSink_connectionString": {
 						"value": "[parameters('AzureSQLSink_connectionString')]"
+					},
+					"AzureStorageLinkedService12_connectionString": {
+						"value": "[parameters('AzureStorageLinkedService12_connectionString')]"
 					},
 					"OnPremSQLServer_connectionString": {
 						"value": "[parameters('OnPremSQLServer_connectionString')]"
