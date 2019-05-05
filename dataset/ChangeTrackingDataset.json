@@ -5,6 +5,9 @@
 			"referenceName": "AzureSQLSink",
 			"type": "LinkedServiceReference"
 		},
+		"folder": {
+			"name": "Change Tracking"
+		},
 		"type": "AzureSqlTable",
 		"schema": [],
 		"typeProperties": {
