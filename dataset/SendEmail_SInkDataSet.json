@@ -5,6 +5,9 @@
 			"referenceName": "MailActivity_SOurceBlob",
 			"type": "LinkedServiceReference"
 		},
+		"folder": {
+			"name": "MailActivity"
+		},
 		"type": "DelimitedText",
 		"typeProperties": {
 			"location": {
