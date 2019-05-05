@@ -28,6 +28,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'AzureStorageLinkedService12'"
 		},
+		"MailActivity_SOurceBlob_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'MailActivity_SOurceBlob'"
+		},
 		"OnPremSQLServer_connectionString": {
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'OnPremSQLServer'"
@@ -81,6 +85,9 @@
 					},
 					"AzureStorageLinkedService12_connectionString": {
 						"value": "[parameters('AzureStorageLinkedService12_connectionString')]"
+					},
+					"MailActivity_SOurceBlob_connectionString": {
+						"value": "[parameters('MailActivity_SOurceBlob_connectionString')]"
 					},
 					"OnPremSQLServer_connectionString": {
 						"value": "[parameters('OnPremSQLServer_connectionString')]"

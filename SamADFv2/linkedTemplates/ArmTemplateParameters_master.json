@@ -20,6 +20,9 @@
 		"AzureStorageLinkedService12_connectionString": {
 			"value": ""
 		},
+		"MailActivity_SOurceBlob_connectionString": {
+			"value": ""
+		},
 		"OnPremSQLServer_connectionString": {
 			"value": ""
 		},
