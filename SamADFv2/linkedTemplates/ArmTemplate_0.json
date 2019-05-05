@@ -856,7 +856,7 @@
 			"properties": {
 				"activities": [
 					{
-						"name": "Copy Data1",
+						"name": "Copy1",
 						"type": "Copy",
 						"dependsOn": [],
 						"policy": {
@@ -911,7 +911,7 @@
 						"type": "WebActivity",
 						"dependsOn": [
 							{
-								"activity": "Copy Data1",
+								"activity": "Copy1",
 								"dependencyConditions": [
 									"Succeeded"
 								]
@@ -932,21 +932,13 @@
 								"Content-Type": "application/json"
 							},
 							"body": {
-								"message": "@{activity('Copy1').output.dataWritten}",
-								"dataFactoryName": "@{pipeline().DataFactory}",
-								"pipelineName": "@{pipeline().Pipeline}",
-								"receiver": "@pipeline().parameters.receiver"
+								"value": "{\n    \"message\": \"@{activity('Copy1').output.dataWritten}\",\n    \"dataFactoryName\": \"@{pipeline().DataFactory}\",\n    \"pipelineName\": \"@{pipeline().Pipeline}\",\n    \"receiver\": \"@pipeline().parameters.receiver\"\n}",
+								"type": "Expression"
 							}
 						}
 					}
 				],
 				"parameters": {
-					"sourceBlobContainer": {
-						"type": "string"
-					},
-					"sinkBlobContainer": {
-						"type": "string"
-					},
 					"receiver": {
 						"type": "string"
 					}
