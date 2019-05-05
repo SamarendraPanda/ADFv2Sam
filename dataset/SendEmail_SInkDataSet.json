@@ -1,0 +1,28 @@
+{
+	"name": "SendEmail_SInkDataSet",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "MailActivity_SOurceBlob",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "MailActivity"
+		},
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": {
+					"value": "@CONCAT(pipeline().RunId, '.txt')",
+					"type": "Expression"
+				},
+				"folderPath": "adftutorial/SendMail_Output",
+				"container": "firstblobcontainer"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}
