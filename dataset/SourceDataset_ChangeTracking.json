@@ -1,0 +1,17 @@
+{
+	"name": "SourceDataset_ChangeTracking",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSQLSink",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "Change Tracking"
+		},
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"tableName": "[dbo].[data_source_table]"
+		}
+	}
+}

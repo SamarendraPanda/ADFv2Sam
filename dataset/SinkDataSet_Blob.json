@@ -1,0 +1,41 @@
+{
+	"name": "SinkDataSet_Blob",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureStorageLinkedService12",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "Change Tracking"
+		},
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "@CONCAT('Incremental-', pipeline().RunId, '.txt') ",
+				"folderPath": "adftutorial/incchgtracking",
+				"container": "firstblobcontainer"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"quoteChar": "\""
+		},
+		"schema": [
+			{
+				"type": "String"
+			},
+			{
+				"type": "String"
+			},
+			{
+				"type": "String"
+			},
+			{
+				"type": "String"
+			},
+			{
+				"type": "String"
+			}
+		]
+	}
+}
