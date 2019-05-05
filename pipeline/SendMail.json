@@ -1,5 +1,5 @@
 {
-	"name": "pipeline1",
+	"name": "SendMail",
 	"properties": {
 		"activities": [
 			{
@@ -23,11 +23,28 @@
 							"type": "DelimitedTextReadSetting"
 						}
 					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSetting"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSetting",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
 					"enableStaging": false
 				},
 				"inputs": [
 					{
 						"referenceName": "SendEmail_SourceBlobDataSet",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "SendEmail_SInkDataSet",
 						"type": "DatasetReference"
 					}
 				]
