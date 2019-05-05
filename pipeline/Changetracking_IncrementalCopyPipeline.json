@@ -17,7 +17,7 @@
 						"type": "AzureSqlSource"
 					},
 					"dataset": {
-						"referenceName": "SourceDataset_ChangeTracking",
+						"referenceName": "ChangeTrackingDataset",
 						"type": "DatasetReference"
 					}
 				}
