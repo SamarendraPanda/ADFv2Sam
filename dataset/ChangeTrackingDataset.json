@@ -1,0 +1,14 @@
+{
+	"name": "ChangeTrackingDataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSQLSink",
+			"type": "LinkedServiceReference"
+		},
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"tableName": "[dbo].[table_store_ChangeTracking_version]"
+		}
+	}
+}
