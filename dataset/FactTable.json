@@ -1,5 +1,5 @@
 {
-	"name": "Dimesiontable",
+	"name": "FactTable",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "POC_BLOB_LinkedService",
@@ -12,7 +12,7 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
-				"fileName": "Dim_Table.csv",
+				"fileName": "Fact_Table.csv",
 				"folderPath": "POC",
 				"container": "firstblobcontainer"
 			},

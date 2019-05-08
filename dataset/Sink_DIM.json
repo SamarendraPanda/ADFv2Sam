@@ -1,0 +1,35 @@
+{
+	"name": "Sink_DIM",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "OnPremSQLServer",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "POC"
+		},
+		"type": "SqlServerTable",
+		"schema": [
+			{
+				"name": "NT Type",
+				"type": "varchar"
+			},
+			{
+				"name": "NT-5 Parent",
+				"type": "varchar"
+			},
+			{
+				"name": "NT-5 Year",
+				"type": "varchar"
+			},
+			{
+				"name": "KS_XI",
+				"type": "int",
+				"precision": 10
+			}
+		],
+		"typeProperties": {
+			"tableName": "[dbo].[Dimesion_Rank]"
+		}
+	}
+}
