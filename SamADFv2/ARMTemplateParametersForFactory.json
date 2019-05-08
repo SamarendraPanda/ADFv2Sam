@@ -31,6 +31,12 @@
 		},
 		"AzureBlob1235678567_properties_typeProperties_folderPath": {
 			"value": "firstblobcontainer/Demo"
+		},
+		"AzureKeyVault1_properties_typeProperties_baseUrl": {
+			"value": "https://sapaKeyVault123.vault.azure.net/"
+		},
+		"POC_BLOB_LinkedService_properties_typeProperties_connectionString_secretName": {
+			"value": "BLOBConnectionString"
 		}
 	}
 }

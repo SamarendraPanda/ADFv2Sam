@@ -1,0 +1,494 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory Name",
+			"defaultValue": "SamADFv2"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/SendMail')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy1",
+						"type": "Copy",
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSetting",
+									"wildcardFileName": "*.*"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSetting"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSetting"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSetting",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "SendEmail_SourceBlobDataSet",
+								"type": "DatasetReference"
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "SendEmail_SInkDataSet",
+								"type": "DatasetReference"
+							}
+						]
+					},
+					{
+						"name": "Web1",
+						"type": "WebActivity",
+						"dependsOn": [
+							{
+								"activity": "Copy1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"typeProperties": {
+							"url": "https://prod-20.southeastasia.logic.azure.com:443/workflows/14a111ed55064aeb8d5aa441fac5af92/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=ZYFUizmXgxk2HpfPEzAx9lS51MMPxkzFQLnKYqQs6GU",
+							"method": "POST",
+							"headers": {
+								"Content-Type": "application/json"
+							},
+							"body": {
+								"value": "{\n    \"message\": \"@{activity('Copy1').output.dataWritten}\",\n    \"dataFactoryName\": \"@{pipeline().DataFactory}\",\n    \"pipelineName\": \"@{pipeline().Pipeline}\",\n    \"receiver\": \"@{pipeline().parameters.receiver}\"\n}\n",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"parameters": {
+					"receiver": {
+						"type": "string"
+					}
+				}
+			}
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AzureKeyVault1')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "AzureKeyVault",
+				"typeProperties": {
+					"baseUrl": "https://sapaKeyVault123.vault.azure.net/"
+				}
+			}
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/POC_BLOB_LinkedService')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"connectionString": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "AzureKeyVault1",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "BLOBConnectionString"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureKeyVault1')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Dimesiontable')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "POC_BLOB_LinkedService",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "POC"
+				},
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "Dim_Table.csv",
+						"folderPath": "POC",
+						"container": "firstblobcontainer"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/POC_BLOB_LinkedService')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/FactTable')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "POC_BLOB_LinkedService",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "POC"
+				},
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "Fact_Table.csv",
+						"folderPath": "POC",
+						"container": "firstblobcontainer"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					},
+					{
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/POC_BLOB_LinkedService')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/POC_CopyActivity')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "DIM_Copy",
+						"type": "Copy",
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSetting"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSetting"
+								}
+							},
+							"sink": {
+								"type": "SqlServerSink",
+								"writeBatchSize": 10000
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "NT Type",
+											"type": "String"
+										},
+										"sink": {
+											"name": "NT Type",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "NT-5 Parent",
+											"type": "String"
+										},
+										"sink": {
+											"name": "NT-5 Parent",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "NT-5 Year",
+											"type": "String"
+										},
+										"sink": {
+											"name": "NT-5 Year",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "KS_XI",
+											"type": "String"
+										},
+										"sink": {
+											"name": "KS_XI",
+											"type": "Int32"
+										}
+									}
+								]
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "Dimesiontable",
+								"type": "DatasetReference"
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "Sink_DIM",
+								"type": "DatasetReference"
+							}
+						]
+					},
+					{
+						"name": "Fact Copy",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "DIM_Copy",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSetting"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSetting"
+								}
+							},
+							"sink": {
+								"type": "SqlServerSink",
+								"writeBatchSize": 10000
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "NT-5 Rank",
+											"type": "String"
+										},
+										"sink": {
+											"name": "NT-5 Rank",
+											"type": "Int32"
+										}
+									},
+									{
+										"source": {
+											"name": "ORDITEM_KS_XI",
+											"type": "String"
+										},
+										"sink": {
+											"name": "ORDITEM_KS_XI",
+											"type": "Int32"
+										}
+									},
+									{
+										"source": {
+											"name": "NT-5 Revenues (kUSD)",
+											"type": "String"
+										},
+										"sink": {
+											"name": "NT-5 Revenues (kUSD)",
+											"type": "Int32"
+										}
+									},
+									{
+										"source": {
+											"name": "ORD_CLOSING_DT_YM",
+											"type": "String"
+										},
+										"sink": {
+											"name": "ORD_CLOSING_DT_YM",
+											"type": "String"
+										}
+									}
+								]
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "FactTable",
+								"type": "DatasetReference"
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "Sink_fact",
+								"type": "DatasetReference"
+							}
+						]
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/Dimesiontable')]",
+				"[concat(variables('factoryId'), '/datasets/Sink_DIM')]",
+				"[concat(variables('factoryId'), '/datasets/FactTable')]",
+				"[concat(variables('factoryId'), '/datasets/Sink_fact')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Sink_DIM')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "OnPremSQLServer",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "POC"
+				},
+				"type": "SqlServerTable",
+				"schema": [
+					{
+						"name": "NT Type",
+						"type": "varchar"
+					},
+					{
+						"name": "NT-5 Parent",
+						"type": "varchar"
+					},
+					{
+						"name": "NT-5 Year",
+						"type": "varchar"
+					},
+					{
+						"name": "KS_XI",
+						"type": "int",
+						"precision": 10
+					}
+				],
+				"typeProperties": {
+					"tableName": "[concat('[', 'dbo].[Dimesion_Rank]')]"
+				}
+			}
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Sink_fact')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "OnPremSQLServer",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "POC"
+				},
+				"type": "SqlServerTable",
+				"schema": [
+					{
+						"name": "NT-5 Rank",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "ORDITEM_KS_XI",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "NT-5 Revenues (kUSD)",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "ORD_CLOSING_DT_YM",
+						"type": "varchar"
+					}
+				],
+				"typeProperties": {
+					"tableName": "[concat('[', 'dbo].[fact_rank]')]"
+				}
+			}
+		}
+	]
+}

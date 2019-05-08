@@ -6,57 +6,92 @@
 			"type": "string",
 			"metadata": "Data Factory Name",
 			"defaultValue": "SamADFv2"
-		},
-		"integrationRuntime_SelfHostedIntegrationRUntime": {
-			"type": "string",
-			"metadata": "Integration Runtime Name",
-			"defaultValue": "SelfHostedIntegrationRUntime"
-		},
-		"AzureBlobStorage1_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'AzureBlobStorage1'"
-		},
-		"AzureSQLSink_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'AzureSQLSink'"
-		},
-		"AzureStorageLinkedService_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'AzureStorageLinkedService'"
-		},
-		"AzureStorageLinkedService12_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'AzureStorageLinkedService12'"
-		},
-		"MailActivity_SOurceBlob_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'MailActivity_SOurceBlob'"
-		},
-		"OnPremSQLServer_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'OnPremSQLServer'"
-		},
-		"AzureBlob1235678567_properties_typeProperties_fileName": {
-			"type": "string",
-			"defaultValue": "Employee1.csv"
-		},
-		"AzureBlob1235678567_properties_typeProperties_folderPath": {
-			"type": "string",
-			"defaultValue": "firstblobcontainer/Demo"
-		},
-		"AzureKeyVault1_properties_typeProperties_baseUrl": {
-			"type": "string",
-			"defaultValue": "https://sapaKeyVault123.vault.azure.net/"
-		},
-		"POC_BLOB_LinkedService_properties_typeProperties_connectionString_secretName": {
-			"type": "string",
-			"defaultValue": "BLOBConnectionString"
 		}
 	},
 	"variables": {
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/Sink_DIM')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "OnPremSQLServer",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "POC"
+				},
+				"annotations": [],
+				"type": "SqlServerTable",
+				"schema": [
+					{
+						"name": "NT Type",
+						"type": "varchar"
+					},
+					{
+						"name": "NT-5 Parent",
+						"type": "varchar"
+					},
+					{
+						"name": "NT-5 Year",
+						"type": "varchar"
+					},
+					{
+						"name": "KS_XI",
+						"type": "int",
+						"precision": 10
+					}
+				],
+				"typeProperties": {
+					"tableName": "[concat('[', 'dbo].[Dimesion_Rank]')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Sink_fact')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "OnPremSQLServer",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "POC"
+				},
+				"annotations": [],
+				"type": "SqlServerTable",
+				"schema": [
+					{
+						"name": "NT-5 Rank",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "ORDITEM_KS_XI",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "NT-5 Revenues (kUSD)",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "ORD_CLOSING_DT_YM",
+						"type": "varchar"
+					}
+				],
+				"typeProperties": {
+					"tableName": "[concat('[', 'dbo].[fact_rank]')]"
+				}
+			},
+			"dependsOn": []
+		},
 		{
 			"name": "[concat(parameters('factoryName'), '/Changetracking_IncrementalCopyPipeline')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
@@ -217,12 +252,7 @@
 				],
 				"annotations": []
 			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/ChangeTrackingDataset')]",
-				"[concat(variables('factoryId'), '/datasets/SourceDataset_ChangeTracking')]",
-				"[concat(variables('factoryId'), '/datasets/SinkDataSet_Blob')]",
-				"[concat(variables('factoryId'), '/linkedServices/AzureSQLSink')]"
-			]
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/FullCopyPipeline')]",
@@ -277,10 +307,7 @@
 				],
 				"annotations": []
 			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/SourceDataset_ChangeTracking')]",
-				"[concat(variables('factoryId'), '/datasets/SinkDataSet_Blob')]"
-			]
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/IncrementalCopyPipeline')]",
@@ -471,12 +498,7 @@
 				},
 				"annotations": []
 			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/WatermarkDataset')]",
-				"[concat(variables('factoryId'), '/datasets/SourceDataset')]",
-				"[concat(variables('factoryId'), '/datasets/SinkDataSet')]",
-				"[concat(variables('factoryId'), '/linkedServices/AzureSQLSink')]"
-			]
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/SendMail')]",
@@ -574,514 +596,7 @@
 				},
 				"annotations": []
 			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/SendEmail_SourceBlobDataSet')]",
-				"[concat(variables('factoryId'), '/datasets/SendEmail_SInkDataSet')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/AzureBlob1235678567')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "AzureStorageLinkedService",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "AzureBlob",
-				"typeProperties": {
-					"format": {
-						"type": "TextFormat",
-						"columnDelimiter": ",",
-						"rowDelimiter": "",
-						"nullValue": "\\N",
-						"treatEmptyAsNull": true,
-						"skipLineCount": 0,
-						"firstRowAsHeader": false
-					},
-					"fileName": "[parameters('AzureBlob1235678567_properties_typeProperties_fileName')]",
-					"folderPath": "[parameters('AzureBlob1235678567_properties_typeProperties_folderPath')]"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/AzureStorageLinkedService')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/ChangeTrackingDataset')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "AzureSQLSink",
-					"type": "LinkedServiceReference"
-				},
-				"folder": {
-					"name": "Change Tracking"
-				},
-				"annotations": [],
-				"type": "AzureSqlTable",
-				"schema": [],
-				"typeProperties": {
-					"tableName": "[concat('[', 'dbo].[table_store_ChangeTracking_version]')]"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/AzureSQLSink')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/SendEmail_SInkDataSet')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "MailActivity_SOurceBlob",
-					"type": "LinkedServiceReference"
-				},
-				"folder": {
-					"name": "MailActivity"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobStorageLocation",
-						"fileName": {
-							"value": "@CONCAT(pipeline().RunId, '.txt')",
-							"type": "Expression"
-						},
-						"folderPath": "adftutorial/SendMail_Output",
-						"container": "firstblobcontainer"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"quoteChar": "\""
-				},
-				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/MailActivity_SOurceBlob')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/SendEmail_SourceBlobDataSet')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "MailActivity_SOurceBlob",
-					"type": "LinkedServiceReference"
-				},
-				"folder": {
-					"name": "MailActivity"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobStorageLocation",
-						"fileName": "input.txt",
-						"folderPath": "adftutorial/Input",
-						"container": "firstblobcontainer"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"quoteChar": "\""
-				},
-				"schema": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/MailActivity_SOurceBlob')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/SinkDataSet')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "AzureSQLSink",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"SinkTableName": {
-						"type": "string"
-					}
-				},
-				"annotations": [],
-				"type": "AzureSqlTable",
-				"schema": [],
-				"typeProperties": {
-					"tableName": {
-						"value": "@dataset().SinkTableName",
-						"type": "Expression"
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/AzureSQLSink')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/SinkDataSet_Blob')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "AzureStorageLinkedService12",
-					"type": "LinkedServiceReference"
-				},
-				"folder": {
-					"name": "Change Tracking"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobStorageLocation",
-						"fileName": {
-							"value": "@CONCAT('Incremental-', pipeline().RunId, '.txt') ",
-							"type": "Expression"
-						},
-						"folderPath": "adftutorial/incchgtracking",
-						"container": "firstblobcontainer"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"quoteChar": "\""
-				},
-				"schema": [
-					{
-						"type": "String"
-					},
-					{
-						"type": "String"
-					},
-					{
-						"type": "String"
-					},
-					{
-						"type": "String"
-					},
-					{
-						"type": "String"
-					}
-				]
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/AzureStorageLinkedService12')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/SourceDataset')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "OnPremSQLServer",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "SqlServerTable",
-				"schema": [],
-				"typeProperties": {}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/OnPremSQLServer')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/SourceDataset_ChangeTracking')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "AzureSQLSink",
-					"type": "LinkedServiceReference"
-				},
-				"folder": {
-					"name": "Change Tracking"
-				},
-				"annotations": [],
-				"type": "AzureSqlTable",
-				"schema": [],
-				"typeProperties": {
-					"tableName": "[concat('[', 'dbo].[data_source_table]')]"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/AzureSQLSink')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/WatermarkDataset')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "AzureSQLSink",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "AzureSqlTable",
-				"schema": [
-					{
-						"name": "TableName",
-						"type": "varchar"
-					},
-					{
-						"name": "WatermarkValue",
-						"type": "datetime",
-						"precision": 23,
-						"scale": 3
-					}
-				],
-				"typeProperties": {
-					"tableName": "[concat('[', 'dbo].[watermarktable]')]"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/AzureSQLSink')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/AzureBlobStorage1')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureBlobStorage",
-				"typeProperties": {
-					"connectionString": "[parameters('AzureBlobStorage1_connectionString')]"
-				}
-			},
 			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/AzureSQLSink')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureSqlDatabase",
-				"typeProperties": {
-					"connectionString": "[parameters('AzureSQLSink_connectionString')]"
-				},
-				"connectVia": {
-					"referenceName": "[parameters('integrationRuntime_SelfHostedIntegrationRUntime')]",
-					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/', parameters('integrationRuntime_SelfHostedIntegrationRUntime'))]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/AzureStorageLinkedService')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureStorage",
-				"typeProperties": {
-					"connectionString": "[parameters('AzureStorageLinkedService_connectionString')]"
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/AzureStorageLinkedService12')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureBlobStorage",
-				"typeProperties": {
-					"connectionString": "[parameters('AzureStorageLinkedService12_connectionString')]"
-				},
-				"connectVia": {
-					"referenceName": "[parameters('integrationRuntime_SelfHostedIntegrationRUntime')]",
-					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/', parameters('integrationRuntime_SelfHostedIntegrationRUntime'))]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/MailActivity_SOurceBlob')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureBlobStorage",
-				"typeProperties": {
-					"connectionString": "[parameters('MailActivity_SOurceBlob_connectionString')]"
-				},
-				"connectVia": {
-					"referenceName": "[parameters('integrationRuntime_SelfHostedIntegrationRUntime')]",
-					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/', parameters('integrationRuntime_SelfHostedIntegrationRUntime'))]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/OnPremSQLServer')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "SqlServer",
-				"typeProperties": {
-					"connectionString": "[parameters('OnPremSQLServer_connectionString')]"
-				},
-				"connectVia": {
-					"referenceName": "[parameters('integrationRuntime_SelfHostedIntegrationRUntime')]",
-					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/', parameters('integrationRuntime_SelfHostedIntegrationRUntime'))]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/', parameters('integrationRuntime_SelfHostedIntegrationRUntime'))]",
-			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "SelfHosted",
-				"typeProperties": {}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/AzureKeyVault1')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureKeyVault",
-				"typeProperties": {
-					"baseUrl": "[parameters('AzureKeyVault1_properties_typeProperties_baseUrl')]"
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/POC_BLOB_LinkedService')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureBlobStorage",
-				"typeProperties": {
-					"connectionString": {
-						"type": "AzureKeyVaultSecret",
-						"store": {
-							"referenceName": "AzureKeyVault1",
-							"type": "LinkedServiceReference"
-						},
-						"secretName": "[parameters('POC_BLOB_LinkedService_properties_typeProperties_connectionString_secretName')]"
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/AzureKeyVault1')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Dimesiontable')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "POC_BLOB_LinkedService",
-					"type": "LinkedServiceReference"
-				},
-				"folder": {
-					"name": "POC"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobStorageLocation",
-						"fileName": "Dim_Table.csv",
-						"folderPath": "POC",
-						"container": "firstblobcontainer"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
-				},
-				"schema": [
-					{
-						"type": "String"
-					},
-					{
-						"type": "String"
-					},
-					{
-						"type": "String"
-					},
-					{
-						"type": "String"
-					}
-				]
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/POC_BLOB_LinkedService')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/FactTable')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "POC_BLOB_LinkedService",
-					"type": "LinkedServiceReference"
-				},
-				"folder": {
-					"name": "POC"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobStorageLocation",
-						"fileName": "Fact_Table.csv",
-						"folderPath": "POC",
-						"container": "firstblobcontainer"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
-				},
-				"schema": [
-					{
-						"type": "String"
-					},
-					{
-						"type": "String"
-					},
-					{
-						"type": "String"
-					},
-					{
-						"type": "String"
-					}
-				]
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/POC_BLOB_LinkedService')]"
-			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/POC_CopyActivity')]",
@@ -1276,94 +791,8 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/Dimesiontable')]",
 				"[concat(variables('factoryId'), '/datasets/Sink_DIM')]",
-				"[concat(variables('factoryId'), '/datasets/FactTable')]",
 				"[concat(variables('factoryId'), '/datasets/Sink_fact')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Sink_DIM')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "OnPremSQLServer",
-					"type": "LinkedServiceReference"
-				},
-				"folder": {
-					"name": "POC"
-				},
-				"annotations": [],
-				"type": "SqlServerTable",
-				"schema": [
-					{
-						"name": "NT Type",
-						"type": "varchar"
-					},
-					{
-						"name": "NT-5 Parent",
-						"type": "varchar"
-					},
-					{
-						"name": "NT-5 Year",
-						"type": "varchar"
-					},
-					{
-						"name": "KS_XI",
-						"type": "int",
-						"precision": 10
-					}
-				],
-				"typeProperties": {
-					"tableName": "[concat('[', 'dbo].[Dimesion_Rank]')]"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/OnPremSQLServer')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Sink_fact')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "OnPremSQLServer",
-					"type": "LinkedServiceReference"
-				},
-				"folder": {
-					"name": "POC"
-				},
-				"annotations": [],
-				"type": "SqlServerTable",
-				"schema": [
-					{
-						"name": "NT-5 Rank",
-						"type": "int",
-						"precision": 10
-					},
-					{
-						"name": "ORDITEM_KS_XI",
-						"type": "int",
-						"precision": 10
-					},
-					{
-						"name": "NT-5 Revenues (kUSD)",
-						"type": "int",
-						"precision": 10
-					},
-					{
-						"name": "ORD_CLOSING_DT_YM",
-						"type": "varchar"
-					}
-				],
-				"typeProperties": {
-					"tableName": "[concat('[', 'dbo].[fact_rank]')]"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/OnPremSQLServer')]"
 			]
 		}
 	]
