@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Copy Data1",
+				"name": "DIM_Copy",
 				"type": "Copy",
 				"policy": {
 					"timeout": "7.00:00:00",
@@ -26,7 +26,52 @@
 						"type": "SqlServerSink",
 						"writeBatchSize": 10000
 					},
-					"enableStaging": false
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "NT Type",
+									"type": "String"
+								},
+								"sink": {
+									"name": "NT Type",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "NT-5 Parent",
+									"type": "String"
+								},
+								"sink": {
+									"name": "NT-5 Parent",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "NT-5 Year",
+									"type": "String"
+								},
+								"sink": {
+									"name": "NT-5 Year",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "KS_XI",
+									"type": "String"
+								},
+								"sink": {
+									"name": "KS_XI",
+									"type": "Int32"
+								}
+							}
+						]
+					}
 				},
 				"inputs": [
 					{
@@ -36,17 +81,17 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "SourceDataset",
+						"referenceName": "Sink_DIM",
 						"type": "DatasetReference"
 					}
 				]
 			},
 			{
-				"name": "Copy Data2",
+				"name": "Fact Copy",
 				"type": "Copy",
 				"dependsOn": [
 					{
-						"activity": "Copy Data1",
+						"activity": "DIM_Copy",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -60,8 +105,78 @@
 					"secureInput": false
 				},
 				"typeProperties": {
-					"enableStaging": false
-				}
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSetting"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSetting"
+						}
+					},
+					"sink": {
+						"type": "SqlServerSink",
+						"writeBatchSize": 10000
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "NT-5 Rank",
+									"type": "String"
+								},
+								"sink": {
+									"name": "NT-5 Rank",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"name": "ORDITEM_KS_XI",
+									"type": "String"
+								},
+								"sink": {
+									"name": "ORDITEM_KS_XI",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"name": "NT-5 Revenues (kUSD)",
+									"type": "String"
+								},
+								"sink": {
+									"name": "NT-5 Revenues (kUSD)",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"name": "ORD_CLOSING_DT_YM",
+									"type": "String"
+								},
+								"sink": {
+									"name": "ORD_CLOSING_DT_YM",
+									"type": "String"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "FactTable",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "Sink_fact",
+						"type": "DatasetReference"
+					}
+				]
 			}
 		]
 	}
