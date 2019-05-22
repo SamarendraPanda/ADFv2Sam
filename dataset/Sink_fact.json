@@ -1,0 +1,37 @@
+{
+	"name": "Sink_fact",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "OnPremSQLServer",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "POC"
+		},
+		"type": "SqlServerTable",
+		"schema": [
+			{
+				"name": "NT-5 Rank",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "ORDITEM_KS_XI",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "NT-5 Revenues (kUSD)",
+				"type": "int",
+				"precision": 10
+			},
+			{
+				"name": "ORD_CLOSING_DT_YM",
+				"type": "varchar"
+			}
+		],
+		"typeProperties": {
+			"tableName": "[dbo].[fact_rank]"
+		}
+	}
+}

@@ -1,0 +1,183 @@
+{
+	"name": "POC_CopyActivity",
+	"properties": {
+		"activities": [
+			{
+				"name": "DIM_Copy",
+				"type": "Copy",
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSetting"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSetting"
+						}
+					},
+					"sink": {
+						"type": "SqlServerSink",
+						"writeBatchSize": 10000
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "NT Type",
+									"type": "String"
+								},
+								"sink": {
+									"name": "NT Type",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "NT-5 Parent",
+									"type": "String"
+								},
+								"sink": {
+									"name": "NT-5 Parent",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "NT-5 Year",
+									"type": "String"
+								},
+								"sink": {
+									"name": "NT-5 Year",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "KS_XI",
+									"type": "String"
+								},
+								"sink": {
+									"name": "KS_XI",
+									"type": "Int32"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "Dimesiontable",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "Sink_DIM",
+						"type": "DatasetReference"
+					}
+				]
+			},
+			{
+				"name": "Fact Copy",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "DIM_Copy",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSetting"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSetting"
+						}
+					},
+					"sink": {
+						"type": "SqlServerSink",
+						"writeBatchSize": 10000
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "NT-5 Rank",
+									"type": "String"
+								},
+								"sink": {
+									"name": "NT-5 Rank",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"name": "ORDITEM_KS_XI",
+									"type": "String"
+								},
+								"sink": {
+									"name": "ORDITEM_KS_XI",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"name": "NT-5 Revenues (kUSD)",
+									"type": "String"
+								},
+								"sink": {
+									"name": "NT-5 Revenues (kUSD)",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"name": "ORD_CLOSING_DT_YM",
+									"type": "String"
+								},
+								"sink": {
+									"name": "ORD_CLOSING_DT_YM",
+									"type": "String"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "FactTable",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "Sink_fact",
+						"type": "DatasetReference"
+					}
+				]
+			}
+		]
+	}
+}
